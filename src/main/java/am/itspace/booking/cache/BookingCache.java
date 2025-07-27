@@ -18,7 +18,7 @@ public class BookingCache {
 
   public void initializeBookingCache(Long bookingId) {
     Booking booking = bookingRepository.findById(bookingId)
-        .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+        .orElseThrow(() -> new BookingNotFoundException("There is no booking with id " + bookingId));
     if (processingBooking.containsKey(bookingId)) {
       processingBooking.put(booking.getId(), booking.getStatus().name());
     }
