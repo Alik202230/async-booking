@@ -29,10 +29,7 @@ public class RoomServiceImpl implements RoomService {
         .build();
 
     Room savedRoom = this.roomRepository.save(room);
-
-
     log.info("Room {} created", savedRoom);
-
     return RoomMapper.toCreateRoomResponse.apply(savedRoom);
   }
 }

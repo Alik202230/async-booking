@@ -42,8 +42,6 @@ public class BookingServiceImpl implements BookingService {
   public CompletableFuture<CreateBookingResponse> createBookingAsync(CreateBookingRequest request) {
     return CompletableFuture.supplyAsync(() -> {
       try {
-        log.info("Creating booking {}", request);
-
         if (!request.getCheckInDate().isBefore(request.getCheckOutDate())) {
           log.warn("Check-in date {} is before check-out date {}", request.getCheckInDate(), request.getCheckOutDate());
           throw new CheckOutDateException("Check-in date must be before check-out date");
@@ -83,7 +81,7 @@ public class BookingServiceImpl implements BookingService {
 
         return BookingMapper.toCreateBookingResponse.apply(savedBooking);
       } catch (Exception e) {
-        log.error("Error creating booking", e);
+        log.error("Error booking processing", e);
         throw e;
       }
     }).thenApply(response -> {
@@ -98,20 +96,20 @@ public class BookingServiceImpl implements BookingService {
   @Override
   public String getBookingStatus(Long bookingId) {
     Booking booking = this.bookingRepository.findById(bookingId)
-        .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
-    bookingCache.initializeBooking(bookingId);
+        .orElseThrow(() -> new BookingNotFoundException("There is no booking with id " + bookingId));
+    bookingCache.initializeBookingCache(bookingId);
     return booking.getStatus().name();
   }
 
   private void sendSuccessNotification(Long bookingId) {
     Booking booking = this.bookingRepository.findById(bookingId)
-        .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
+        .orElseThrow(() -> new BookingNotFoundException("There is no booking with id " + bookingId));
     try {
       log.info("Booking with id {} is in progress status {}", bookingId, booking.getStatus());
       Thread.sleep(15000);
       booking.setStatus(Status.CONFIRMED);
       this.bookingRepository.save(booking);
-      log.info("Booking {} created successfully", bookingId);
+      log.info("Booking with id {} is created successfully", bookingId);
     } catch (InterruptedException e) {
       log.error("Error sending success notification", e);
     }
@@ -137,7 +135,7 @@ public class BookingServiceImpl implements BookingService {
             },
             () -> {
               log.error("Booking with id {} not found", bookingId);
-              throw new BookingNotFoundException("Booking not found");
+              throw new BookingNotFoundException("There is no booking with id " + bookingId);
             });
   }
 

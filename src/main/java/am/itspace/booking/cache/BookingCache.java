@@ -16,7 +16,7 @@ public class BookingCache {
   private final Map<Long, String> processingBooking = new ConcurrentHashMap<>();
   private final BookingRepository bookingRepository;
 
-  public void initializeBooking(Long bookingId) {
+  public void initializeBookingCache(Long bookingId) {
     Booking booking = bookingRepository.findById(bookingId)
         .orElseThrow(() -> new BookingNotFoundException("Booking not found"));
     if (processingBooking.containsKey(bookingId)) {
