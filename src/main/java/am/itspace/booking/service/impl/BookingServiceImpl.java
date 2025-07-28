@@ -118,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
             });
   }
 
-  private static BigDecimal computeTotalPriceForBooking(CreateBookingRequest request, Room room, Long numberOfNights) {
+  private BigDecimal computeTotalPriceForBooking(CreateBookingRequest request, Room room, Long numberOfNights) {
     BigDecimal dailyAdultCost = room.getBaseDailyRate();
     if (request.getNumberOfAdults() > 1) {
       dailyAdultCost = dailyAdultCost.add(
@@ -131,7 +131,7 @@ public class BookingServiceImpl implements BookingService {
     return totalCalculatedPrice.setScale(2, RoundingMode.HALF_UP);
   }
 
-  private static BigDecimal calculateTotalDailyRate(CreateBookingRequest request, Room room, BigDecimal dailyAdultCost) {
+  private BigDecimal calculateTotalDailyRate(CreateBookingRequest request, Room room, BigDecimal dailyAdultCost) {
     BigDecimal dailyChildCost = BigDecimal.ZERO;
     if (request.getNumberOfChildren() > 0) {
       BigDecimal baseChildCost = room.getPricePerChild().multiply(BigDecimal.valueOf(request.getNumberOfChildren()));
