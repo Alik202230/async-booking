@@ -14,6 +14,7 @@ import am.itspace.booking.model.enums.Status;
 import am.itspace.booking.repository.BookingRepository;
 import am.itspace.booking.repository.RoomRepository;
 import am.itspace.booking.service.BookingService;
+import am.itspace.booking.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -36,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
   private final RoomRepository roomRepository;
   private final BookingRepository bookingRepository;
   private final BookingCache bookingCache;
+  private final NotificationService notificationService;
 
   @Override
   @Async("bookingExecutor")
@@ -85,10 +87,10 @@ public class BookingServiceImpl implements BookingService {
         throw e;
       }
     }).thenApply(response -> {
-      sendSuccessNotification(response.getId());
+      this.notificationService.sendSuccessNotification(response.getId());
       return response;
     }).exceptionally(throwable -> {
-      sendFailureNotification(throwable.getMessage());
+      this.notificationService.sendFailureNotification(throwable.getMessage());
       throw new CompletionException(throwable);
     });
   }
@@ -101,29 +103,6 @@ public class BookingServiceImpl implements BookingService {
     return booking.getStatus().name();
   }
 
-  private void sendSuccessNotification(Long bookingId) {
-    Booking booking = this.bookingRepository.findById(bookingId)
-        .orElseThrow(() -> new BookingNotFoundException("There is no booking with id " + bookingId));
-    try {
-      log.info("Booking with id {} is in progress status {}", bookingId, booking.getStatus());
-      Thread.sleep(15000);
-      booking.setStatus(Status.CONFIRMED);
-      this.bookingRepository.save(booking);
-      log.info("Booking with id {} is created successfully", bookingId);
-    } catch (InterruptedException e) {
-      log.error("Error sending success notification", e);
-    }
-  }
-
-  private void sendFailureNotification(String message) {
-    try {
-      log.info("Sending failure notification for booking {}", message);
-      Thread.sleep(300);
-      log.info("Booking creation failed {}", message);
-    } catch (InterruptedException e) {
-      log.error("Error sending failure notification", e);
-    }
-  }
 
   @Override
   @Transactional(propagation = Propagation.REQUIRED)
