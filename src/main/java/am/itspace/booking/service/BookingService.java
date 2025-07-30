@@ -1,13 +1,12 @@
 package am.itspace.booking.service;
 
 import am.itspace.booking.dto.CreateBookingRequest;
-import am.itspace.booking.dto.CreateBookingResponse;
 
 import java.util.concurrent.CompletableFuture;
 
 public interface BookingService {
 
-  CompletableFuture<CreateBookingResponse> createBookingAsync(CreateBookingRequest request);
-  String getBookingStatus(Long bookingId);
+  CompletableFuture<Void> createBookingAsync(CreateBookingRequest request, String uuid);
+  String getBookingStatus(String uuid);
   void cancelBooking(Long bookingId);
 }
